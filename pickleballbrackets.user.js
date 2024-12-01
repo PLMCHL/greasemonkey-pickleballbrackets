@@ -8,64 +8,59 @@
 // @require      https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js
 // ==/UserScript==
 
+const DUPR_SEARCH_URL = "https://backend.mydupr.com/player/v1.0/search/public";
+
 $(document).ready(function () {
-    //     console.log('ready');
-
     $(".table-players").on("DOMNodeInserted", "tr.playerrow", function () {
-        //     console.log(`test`);
-
         const dupr_score = $(this).find(".dupr_score");
 
+        // Don't trigger the update if we already loaded their score
         if (dupr_score.length > 0) {
             console.log("loaded");
             return;
         }
 
-        const aaa = $(this).find(".removetag");
+        const player_name_containers = $(this).find(".removetag");
 
-        for (const bbb of aaa) {
-            const ccc = $(bbb).find("a").get(0);
-            const name = $(ccc).text();
-
-            //                   console.log(name);
-
-            const url = "https://backend.mydupr.com/player/v1.0/search/public";
+        for (const player_name_container of player_name_containers) {
+            const player_name_a = $(player_name_container).find("a").get(0);
+            const player_name = $(player_name_a).text();
 
             GM.xmlHttpRequest({
                 method: "POST",
-                url: url,
+                url: DUPR_SEARCH_URL,
                 data: JSON.stringify({
                     filter: {},
                     includeUnclaimedPlayers: true,
                     limit: 10,
                     offset: 0,
                     pageSource: "LD_ADD_PARTICIPANT",
-                    query: name,
+                    query: player_name,
                     verifiedEmail: true,
                 }),
                 headers: {
                     "Content-Type": "application/json",
                 },
                 onload: function (result) {
-                    //         console.log (result);
-
                     const { response } = result;
 
-                    console.log(JSON.parse(response).result);
+                    // console.log(JSON.parse(response).result);
 
                     const hits = JSON.parse(response).result.hits;
 
                     if (hits.length < 1) {
-                        console.log("missing hit");
+                        console.log("No hits for player");
                     }
 
                     if (hits.length > 1) {
-                        console.log("oooops");
+                        console.log("Too many hits for player");
                     }
 
-                    const text = hits[0].ratings.doubles;
+                    const doubles_rating = hits[0].ratings.doubles;
 
-                    $(bbb).append($("<div>").addClass("dupr_score").html(text));
+                    $(player_name_container).append(
+                        $("<div>").addClass("dupr_score").html(doubles_rating)
+                    );
                 },
             });
         }
