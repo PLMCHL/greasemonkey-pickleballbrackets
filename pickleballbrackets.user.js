@@ -52,7 +52,7 @@ $(document).ready(function () {
 
                         let rating = "???";
                         if (hits.length < 1) {
-                            console.log("No hits for player");
+                            rating = "NF";
                         } else if (hits.length > 1) {
                             console.log("Too many hits for player");
                         } else {
