@@ -16,53 +16,61 @@ $(document).ready(function () {
 
         // Don't trigger the update if we already loaded their score
         if (dupr_score.length > 0) {
-            console.log("loaded");
             return;
         }
 
-        const player_name_containers = $(this).find(".removetag");
+        const team_containers = $(this).find("tr");
 
-        for (const player_name_container of player_name_containers) {
-            const player_name_a = $(player_name_container).find("a").get(0);
-            const player_name = $(player_name_a).text();
+        for (const team_container of team_containers) {
+            const player_name_containers = $(team_container).find(".removetag");
 
-            GM.xmlHttpRequest({
-                method: "POST",
-                url: DUPR_SEARCH_URL,
-                data: JSON.stringify({
-                    filter: {},
-                    includeUnclaimedPlayers: true,
-                    limit: 10,
-                    offset: 0,
-                    pageSource: "LD_ADD_PARTICIPANT",
-                    query: player_name,
-                    verifiedEmail: true,
-                }),
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                onload: function (result) {
-                    const { response } = result;
+            for (const player_name_container of player_name_containers) {
+                const player_name_a = $(player_name_container).find("a").get(0);
+                const player_name = $(player_name_a).text();
 
-                    // console.log(JSON.parse(response).result);
+                GM.xmlHttpRequest({
+                    method: "POST",
+                    url: DUPR_SEARCH_URL,
+                    data: JSON.stringify({
+                        filter: {},
+                        includeUnclaimedPlayers: true,
+                        limit: 10,
+                        offset: 0,
+                        pageSource: "LD_ADD_PARTICIPANT",
+                        query: player_name,
+                        verifiedEmail: true,
+                    }),
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    onload: function (result) {
+                        const { response } = result;
 
-                    const hits = JSON.parse(response).result.hits;
+                        // console.log(JSON.parse(response).result);
 
-                    if (hits.length < 1) {
-                        console.log("No hits for player");
-                    }
+                        const hits = JSON.parse(response).result.hits;
 
-                    if (hits.length > 1) {
-                        console.log("Too many hits for player");
-                    }
+                        let rating = "???";
+                        if (hits.length < 1) {
+                            console.log("No hits for player");
+                        } else if (hits.length > 1) {
+                            console.log("Too many hits for player");
+                        } else {
+                            rating = hits[0].ratings.doubles;
+                        }
 
-                    const doubles_rating = hits[0].ratings.doubles;
-
-                    $(player_name_container).append(
-                        $("<div>").addClass("dupr_score").html(doubles_rating)
-                    );
-                },
-            });
+                        $(team_container)
+                            .find("td:nth-child(1)")
+                            .after(getTableItem(rating).addClass("dupr_score"));
+                    },
+                });
+            }
         }
     });
 });
+
+function getTableItem(value) {
+    return $(
+        `<td style="min-width: 40px; max-width: 40px; width: 40px; text-align:center; " class="p-t-5 p-b-5">${value}</td>`
+    );
+}
