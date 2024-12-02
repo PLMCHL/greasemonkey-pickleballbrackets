@@ -13,3 +13,10 @@ Script adding functionality to pickleballbrackers.com
 ## Intall
 
 Visit `https://github.com/PLMCHL/greasemonkey-pickleballbrackets/raw/refs/heads/main/pickleballbrackets.user.js` and install
+
+## Development
+
+-   Give chrome tampermonkey extension developer permissions and access to local files
+-   Update `pickleballbrackets.dev.user.js` to point to your local `pickleballbrackets.user.js` file
+-   Install `pickleballbrackets.local.user.js`
+-   Make changes to `pickleballbrackets.user.js`
