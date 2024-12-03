@@ -94,13 +94,12 @@ function handlePlayerRow(team_container) {
 
                 const hits = JSON.parse(response).result.hits;
 
-                let rating = "???";
+                let rating = undefined;
                 let age = undefined;
                 if (hits.length < 1) {
                     rating = "NF";
                 } else if (hits.length > 1) {
-                    // TODO: Add link to player search
-                    console.log("Too many hits for player");
+                    rating = `<a href="https://dashboard.dupr.com/dashboard/browse/players" target="_blank">🔍</a>`;
                 } else {
                     rating = hits[0].ratings.doubles;
                     age = hits[0].age;
