@@ -15,6 +15,9 @@ const OBSERVER_CONFIG = {
     childList: true,
 };
 
+const RATING_TD_SELECTOR = "td:nth-child(1)";
+const AGE_TD_SELECTOR = "td:nth-child(4)";
+
 $(document).ready(function () {
     var observer = new MutationObserver(function (mutations) {
         mutations.forEach(function (mutation) {
@@ -63,11 +66,6 @@ function handlePlayerRow(team_container) {
         const [_, lastName, firstName] = player_name_text.match(/^(.*), (.*)$/);
         const player_name = `${firstName} ${lastName}`;
 
-        $(team_container)
-            .find("td:nth-child(1)")
-            .after(getTableItem("⌛"))
-            .remove();
-
         GM.xmlHttpRequest({
             method: "POST",
             url: DUPR_SEARCH_URL,
@@ -91,24 +89,31 @@ function handlePlayerRow(team_container) {
                 const { response } = result;
 
                 const { rating, age } = getPlayerDetails(
+                    team_container,
                     JSON.parse(response).result.hits,
                     player_name,
                     bracket_type
                 );
 
-                $(team_container)
-                    .find("td:nth-child(1)")
-                    .after(
-                        getTableItem(rating).css(
-                            "color",
-                            getRatingColor(rating, bracket_low, bracket_high)
+                if (rating) {
+                    $(team_container)
+                        .find(RATING_TD_SELECTOR)
+                        .after(
+                            getTableItem(rating).css(
+                                "color",
+                                getRatingColor(
+                                    rating,
+                                    bracket_low,
+                                    bracket_high
+                                )
+                            )
                         )
-                    )
-                    .remove();
+                        .remove();
+                }
 
                 if (age) {
                     $(team_container)
-                        .find("td:nth-child(4)")
+                        .find(AGE_TD_SELECTOR)
                         .after(getTableItem(age))
                         .remove();
                 }
@@ -117,21 +122,19 @@ function handlePlayerRow(team_container) {
     }
 }
 
-function getPlayerDetails(hits, player_name, bracket_type) {
-    // No results
-    if (hits.length < 1) {
-        return { rating: "NF" };
-    }
-
+function getPlayerDetails(team_container, hits, player_name, bracket_type) {
     if (
+        // No results
+        hits.length < 1 ||
         // Multiple results
         hits.length > 1 ||
         // Result does not match
         player_name.toLowerCase() !==
             hits[0].fullName.toLowerCase().replace(/[\W_]+/g, " ")
     ) {
+        const original_dupr = $(team_container).find(RATING_TD_SELECTOR).text();
         return {
-            rating: `<a href="https://dashboard.dupr.com/dashboard/browse/players" target="_blank">🔍</a>`,
+            rating: `<a href="https://dashboard.dupr.com/dashboard/browse/players" target="_blank">${original_dupr}🔍</a>`,
         };
     }
 
