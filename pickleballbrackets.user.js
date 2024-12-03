@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         picklballbrackets upgrades
 // @description  Additional features for picklballbrackets.com
-// @version      0.2
+// @version      0.3
 // @author       PLMCHL
 // @match        https://pickleballbrackets.com/ptplg.aspx*
 // @grant        GM.xmlHttpRequest
