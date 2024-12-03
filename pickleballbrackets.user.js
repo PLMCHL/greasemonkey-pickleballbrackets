@@ -46,7 +46,8 @@ function handlePlayerRow(team_container) {
         .find("h4")
         .text()
         .trim()
-        .match(/^.*(.*) Skill: \((.*) (To|And) (.*)\) Age: .*\).*$/);
+        .match(/^.* (.*) Skill: \((.*) (To|And) (.*)\) Age: .*\).*$/);
+    const bracket_type = _1;
     const bracket_low = parseFloat(_2);
     const bracket_high = parseFloat(_4);
 
@@ -58,6 +59,10 @@ function handlePlayerRow(team_container) {
         const player_name_a = $(player_name_container).find("a").get(0);
         const player_name = $(player_name_a).text();
 
+        if (player_name.trim() == "") {
+            continue;
+        }
+
         GM.xmlHttpRequest({
             method: "POST",
             url: DUPR_SEARCH_URL,
@@ -67,12 +72,11 @@ function handlePlayerRow(team_container) {
                         category: "DUPR",
                         maxRating: 10,
                         minRating: 0,
-                        // TODO: type: "DOUBLES",
+                        type: bracket_type.toUpperCase(),
                     },
                 },
                 includeUnclaimedPlayers: false,
                 limit: 2,
-                pageSource: "LD_ADD_PARTICIPANT",
                 query: player_name,
             }),
             headers: {
