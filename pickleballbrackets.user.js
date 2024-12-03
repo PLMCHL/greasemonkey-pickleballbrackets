@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         picklballbrackets upgrades
 // @description  Additional features for picklballbrackets.com
-// @version      0.1
+// @version      0.2
 // @author       PLMCHL
 // @match        https://pickleballbrackets.com/ptplg.aspx*
 // @grant        GM.xmlHttpRequest
@@ -90,8 +90,6 @@ function handlePlayerRow(team_container) {
             onload: function (result) {
                 const { response } = result;
 
-                // console.log(JSON.parse(response).result);
-
                 const hits = JSON.parse(response).result.hits;
 
                 let rating = undefined;
@@ -101,7 +99,7 @@ function handlePlayerRow(team_container) {
                 } else if (hits.length > 1) {
                     rating = `<a href="https://dashboard.dupr.com/dashboard/browse/players" target="_blank">🔍</a>`;
                 } else {
-                    rating = hits[0].ratings.doubles;
+                    rating = hits[0].ratings[bracket_type.toLowerCase()];
                     age = hits[0].age;
                 }
 
