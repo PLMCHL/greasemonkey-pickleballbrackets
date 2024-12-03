@@ -63,6 +63,11 @@ function handlePlayerRow(team_container) {
             continue;
         }
 
+        $(team_container)
+            .find("td:nth-child(1)")
+            .after(getTableItem("⌛"))
+            .remove();
+
         GM.xmlHttpRequest({
             method: "POST",
             url: DUPR_SEARCH_URL,
