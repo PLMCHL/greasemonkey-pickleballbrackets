@@ -17,6 +17,7 @@ const OBSERVER_CONFIG = {
 
 const RATING_TD_SELECTOR = "td:nth-child(1)";
 const AGE_TD_SELECTOR = "td:nth-child(4)";
+const LOCATION_TD_SELECTOR = "td:nth-child(5)";
 
 $(document).ready(function () {
     var observer = new MutationObserver(function (mutations) {
@@ -125,9 +126,16 @@ function handlePlayerRow(team_container) {
 }
 
 function getPlayerDetails(team_container, hits, player_name, bracket_type) {
+    const location = getLocation(team_container);
+
     // Filter out names that don't match
     const clean_hits = hits.filter(
-        (hit) => hit && cleanString(player_name) == cleanString(hit.fullName)
+        (hit) =>
+            hit &&
+            cleanString(player_name) == cleanString(hit.fullName) &&
+            (!location.state ||
+                !hit.shortAddress ||
+                hit.shortAddress.includes(location.state))
     );
 
     if (
@@ -146,6 +154,22 @@ function getPlayerDetails(team_container, hits, player_name, bracket_type) {
     const rating = clean_hits[0].ratings[bracket_type.toLowerCase()];
     const age = clean_hits[0].age;
     return { age, rating };
+}
+
+function getLocation(team_container) {
+    const [_0, _1, _2, _3] = $(team_container)
+        .find(LOCATION_TD_SELECTOR)
+        .text()
+        .trim()
+        .match(/^([\w ]*)(, )?(\w*)$/);
+
+    if (!_1) {
+        return {};
+    }
+    if (!_3) {
+        return { state: _1 };
+    }
+    return { city: _1, state: _3 };
 }
 
 function getTableItem(value) {
