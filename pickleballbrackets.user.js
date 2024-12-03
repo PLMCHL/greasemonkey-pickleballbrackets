@@ -54,7 +54,7 @@ function handlePlayerRow(team_container) {
         );
     const bracket_type = _1;
     const bracket_low = parseFloat(_2);
-    const bracket_high = parseFloat(_4);
+    const bracket_high = parseFloat(_4) || bracket_low + 0.5;
 
     // Fetch DUPRs
     const player_name_tds = $(team_container).find(".removetag").toArray();
