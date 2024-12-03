@@ -131,8 +131,7 @@ function getPlayerDetails(team_container, hits, player_name, bracket_type) {
         // Multiple results
         hits.length > 1 ||
         // Result does not match
-        player_name.toLowerCase() !==
-            hits[0].fullName.toLowerCase().replace(/[\W_]+/g, " ")
+        cleanString(player_name) !== cleanString(hits[0].fullName)
     ) {
         const original_dupr = $(team_container).find(RATING_TD_SELECTOR).text();
         return {
@@ -165,4 +164,11 @@ function getRatingColor(rating, low, high) {
     }
 
     return undefined;
+}
+
+function cleanString(value) {
+    return value
+        .trim()
+        .toLowerCase()
+        .replace(/[\W_]+/g, " ");
 }
