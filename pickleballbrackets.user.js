@@ -95,6 +95,7 @@ function handlePlayerRow(team_container) {
                 const hits = JSON.parse(response).result.hits;
 
                 let rating = "???";
+                let age = undefined;
                 if (hits.length < 1) {
                     rating = "NF";
                 } else if (hits.length > 1) {
@@ -102,6 +103,7 @@ function handlePlayerRow(team_container) {
                     console.log("Too many hits for player");
                 } else {
                     rating = hits[0].ratings.doubles;
+                    age = hits[0].age;
                 }
 
                 $(team_container)
@@ -113,6 +115,13 @@ function handlePlayerRow(team_container) {
                         )
                     )
                     .remove();
+
+                if (age) {
+                    $(team_container)
+                        .find("td:nth-child(4)")
+                        .after(getTableItem(age))
+                        .remove();
+                }
             },
         });
     }

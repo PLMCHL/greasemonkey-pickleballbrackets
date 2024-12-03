@@ -4,7 +4,10 @@
 
 Script adding functionality to pickleballbrackers.com
 
--   Add official DUPR to tournament's registered players lists
+Tournament's registered players lists:
+
+-   Show official DUPR
+-   Show DUPR age
 
 ## Requirements
 
