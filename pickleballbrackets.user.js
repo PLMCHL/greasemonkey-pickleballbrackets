@@ -52,16 +52,16 @@ function handlePlayerRow(team_container) {
     const bracket_high = parseFloat(_4);
 
     // Fetch DUPRs
-    const player_name_containers = $(team_container)
-        .find(".removetag")
-        .toArray();
-    for (const player_name_container of player_name_containers) {
-        const player_name_a = $(player_name_container).find("a").get(0);
-        const player_name = $(player_name_a).text();
+    const player_name_tds = $(team_container).find(".removetag").toArray();
+    for (const player_name_td of player_name_tds) {
+        const player_name_a = $(player_name_td).find("a").get(0);
+        const player_name_text = $(player_name_a).text().trim();
 
-        if (player_name.trim() == "") {
+        if (player_name_text == "") {
             continue;
         }
+        const [_, lastName, firstName] = player_name_text.match(/^(.*), (.*)$/);
+        const player_name = `${firstName} ${lastName}`;
 
         $(team_container)
             .find("td:nth-child(1)")
@@ -90,18 +90,11 @@ function handlePlayerRow(team_container) {
             onload: function (result) {
                 const { response } = result;
 
-                const hits = JSON.parse(response).result.hits;
-
-                let rating = undefined;
-                let age = undefined;
-                if (hits.length < 1) {
-                    rating = "NF";
-                } else if (hits.length > 1) {
-                    rating = `<a href="https://dashboard.dupr.com/dashboard/browse/players" target="_blank">🔍</a>`;
-                } else {
-                    rating = hits[0].ratings[bracket_type.toLowerCase()];
-                    age = hits[0].age;
-                }
+                const { rating, age } = getPlayerDetails(
+                    JSON.parse(response).result.hits,
+                    player_name,
+                    bracket_type
+                );
 
                 $(team_container)
                     .find("td:nth-child(1)")
@@ -122,6 +115,30 @@ function handlePlayerRow(team_container) {
             },
         });
     }
+}
+
+function getPlayerDetails(hits, player_name, bracket_type) {
+    // No results
+    if (hits.length < 1) {
+        return { rating: "NF" };
+    }
+
+    if (
+        // Multiple results
+        hits.length > 1 ||
+        // Result does not match
+        player_name.toLowerCase() !==
+            hits[0].fullName.toLowerCase().replace(/[\W_]+/g, " ")
+    ) {
+        return {
+            rating: `<a href="https://dashboard.dupr.com/dashboard/browse/players" target="_blank">🔍</a>`,
+        };
+    }
+
+    // Player found
+    const rating = hits[0].ratings[bracket_type.toLowerCase()];
+    const age = hits[0].age;
+    return { age, rating };
 }
 
 function getTableItem(value) {
