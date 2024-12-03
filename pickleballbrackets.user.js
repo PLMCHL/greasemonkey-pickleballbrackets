@@ -125,13 +125,16 @@ function handlePlayerRow(team_container) {
 }
 
 function getPlayerDetails(team_container, hits, player_name, bracket_type) {
+    // Filter out names that don't match
+    const clean_hits = hits.filter(
+        (hit) => hit && cleanString(player_name) == cleanString(hit.fullName)
+    );
+
     if (
         // No results
-        hits.length < 1 ||
+        clean_hits.length < 1 ||
         // Multiple results
-        hits.length > 1 ||
-        // Result does not match
-        cleanString(player_name) !== cleanString(hits[0].fullName)
+        clean_hits.length > 1
     ) {
         const original_dupr = $(team_container).find(RATING_TD_SELECTOR).text();
         return {
@@ -140,8 +143,8 @@ function getPlayerDetails(team_container, hits, player_name, bracket_type) {
     }
 
     // Player found
-    const rating = hits[0].ratings[bracket_type.toLowerCase()];
-    const age = hits[0].age;
+    const rating = clean_hits[0].ratings[bracket_type.toLowerCase()];
+    const age = clean_hits[0].age;
     return { age, rating };
 }
 
