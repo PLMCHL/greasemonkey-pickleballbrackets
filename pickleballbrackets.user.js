@@ -49,7 +49,9 @@ function handlePlayerRow(team_container) {
         .find("h4")
         .text()
         .trim()
-        .match(/^.* (.*) Skill: \((.*) (To|And) (.*)\) Age: .*\).*$/);
+        .match(
+            /^.* (\w*) Skill: \(([\d\.]*)( To | And )?([\w\d\.]*)\) Age: .*\).*$/
+        );
     const bracket_type = _1;
     const bracket_low = parseFloat(_2);
     const bracket_high = parseFloat(_4);
