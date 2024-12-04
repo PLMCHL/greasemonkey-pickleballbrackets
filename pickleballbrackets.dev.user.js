@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         picklballbrackets upgrades [DEV]
 // @description  Imports local version of pickleballbrackets script
-// @version      0.1
+// @version      0.3
 // @author       PLMCHL
 // @match        https://pickleballbrackets.com/ptplg.aspx*
 // @grant        GM.xmlHttpRequest

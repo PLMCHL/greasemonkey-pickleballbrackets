@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         picklballbrackets upgrades
 // @description  Additional features for picklballbrackets.com
-// @version      0.2
+// @version      0.3
 // @author       PLMCHL
 // @match        https://pickleballbrackets.com/ptplg.aspx*
 // @grant        GM.xmlHttpRequest
@@ -14,6 +14,10 @@ const OBSERVER_CONFIG = {
     subtree: true,
     childList: true,
 };
+
+const RATING_TD_SELECTOR = "td:nth-child(1)";
+const AGE_TD_SELECTOR = "td:nth-child(4)";
+const LOCATION_TD_SELECTOR = "td:nth-child(5)";
 
 $(document).ready(function () {
     var observer = new MutationObserver(function (mutations) {
@@ -46,27 +50,25 @@ function handlePlayerRow(team_container) {
         .find("h4")
         .text()
         .trim()
-        .match(/^.* (.*) Skill: \((.*) (To|And) (.*)\) Age: .*\).*$/);
+        .match(
+            /^.* (\w*) Skill: \(([\d\.]*)( To | And )?([\w\d\.]*)\) Age: .*\).*$/
+        );
     const bracket_type = _1;
     const bracket_low = parseFloat(_2);
-    const bracket_high = parseFloat(_4);
+    const bracket_high = parseFloat(_4) || bracket_low + 0.5;
 
     // Fetch DUPRs
     const player_name_containers = $(team_container)
         .find(".removetag")
         .toArray();
     for (const player_name_container of player_name_containers) {
-        const player_name_a = $(player_name_container).find("a").get(0);
-        const player_name = $(player_name_a).text();
+        const player_name_text = $(player_name_container).text().trim();
 
-        if (player_name.trim() == "") {
+        if (player_name_text == "") {
             continue;
         }
-
-        $(team_container)
-            .find("td:nth-child(1)")
-            .after(getTableItem("⌛"))
-            .remove();
+        const [_, lastName, firstName] = player_name_text.match(/^(.*), (.*)$/);
+        const player_name = `${firstName} ${lastName}`;
 
         GM.xmlHttpRequest({
             method: "POST",
@@ -90,38 +92,85 @@ function handlePlayerRow(team_container) {
             onload: function (result) {
                 const { response } = result;
 
-                const hits = JSON.parse(response).result.hits;
+                const { rating, age } = getPlayerDetails(
+                    team_container,
+                    JSON.parse(response).result.hits,
+                    player_name,
+                    bracket_type
+                );
 
-                let rating = undefined;
-                let age = undefined;
-                if (hits.length < 1) {
-                    rating = "NF";
-                } else if (hits.length > 1) {
-                    rating = `<a href="https://dashboard.dupr.com/dashboard/browse/players" target="_blank">🔍</a>`;
-                } else {
-                    rating = hits[0].ratings[bracket_type.toLowerCase()];
-                    age = hits[0].age;
-                }
-
-                $(team_container)
-                    .find("td:nth-child(1)")
-                    .after(
-                        getTableItem(rating).css(
-                            "color",
-                            getRatingColor(rating, bracket_low, bracket_high)
+                if (rating) {
+                    $(team_container)
+                        .find(RATING_TD_SELECTOR)
+                        .after(
+                            getTableItem(rating).css(
+                                "background-color",
+                                getRatingColor(
+                                    rating,
+                                    bracket_low,
+                                    bracket_high
+                                )
+                            )
                         )
-                    )
-                    .remove();
+                        .remove();
+                }
 
                 if (age) {
                     $(team_container)
-                        .find("td:nth-child(4)")
+                        .find(AGE_TD_SELECTOR)
                         .after(getTableItem(age))
                         .remove();
                 }
             },
         });
     }
+}
+
+function getPlayerDetails(team_container, hits, player_name, bracket_type) {
+    const location = getLocation(team_container);
+
+    // Filter out names that don't match
+    const clean_hits = hits.filter(
+        (hit) =>
+            hit &&
+            cleanString(player_name) == cleanString(hit.fullName) &&
+            (!location.state ||
+                !hit.shortAddress ||
+                hit.shortAddress.includes(location.state))
+    );
+
+    if (
+        // No results
+        clean_hits.length < 1 ||
+        // Multiple results
+        clean_hits.length > 1
+    ) {
+        const original_dupr = $(team_container).find(RATING_TD_SELECTOR).text();
+        return {
+            rating: `<a href="https://dashboard.dupr.com/dashboard/browse/players" target="_blank">${original_dupr}🔍</a>`,
+        };
+    }
+
+    // Player found
+    const rating = clean_hits[0].ratings[bracket_type.toLowerCase()];
+    const age = clean_hits[0].age;
+    return { age, rating };
+}
+
+function getLocation(team_container) {
+    const [_0, _1, _2, _3] = $(team_container)
+        .find(LOCATION_TD_SELECTOR)
+        .text()
+        .trim()
+        .match(/^([\w ]*)(, )?(\w*)$/);
+
+    if (!_1) {
+        return {};
+    }
+    if (!_3) {
+        return { state: _1 };
+    }
+    return { city: _1, state: _3 };
 }
 
 function getTableItem(value) {
@@ -132,15 +181,22 @@ function getTableItem(value) {
 
 function getRatingColor(rating, low, high) {
     if (rating < low) {
-        return "blue";
+        return "rgba(14, 137, 253, 0.2)";
     }
 
     if (rating > high) {
         if (rating - high < 0.5) {
-            return "orange";
+            return "rgba(255, 147, 4, 0.5)";
         }
-        return "red";
+        return "rgba(199, 1, 0, 0.5)";
     }
 
     return undefined;
+}
+
+function cleanString(value) {
+    return value
+        .trim()
+        .toLowerCase()
+        .replace(/[\W_]+/g, " ");
 }
