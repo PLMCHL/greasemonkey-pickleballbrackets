@@ -23,7 +23,7 @@ Tournament's registered players lists:
 
 ## Intall
 
--   Visit `https://github.com/PLMCHL/greasemonkey-pickleballbrackets/raw/refs/heads/main/pickleballbrackets.user.js`
+-   Visit [the install link](https://github.com/PLMCHL/greasemonkey-pickleballbrackets/raw/refs/heads/main/pickleballbrackets.user.js)
 -   Accept install
 
 ## Development
