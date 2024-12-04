@@ -58,10 +58,11 @@ function handlePlayerRow(team_container) {
     const bracket_high = parseFloat(_4) || bracket_low + 0.5;
 
     // Fetch DUPRs
-    const player_name_tds = $(team_container).find(".removetag").toArray();
-    for (const player_name_td of player_name_tds) {
-        const player_name_a = $(player_name_td).find("a").get(0);
-        const player_name_text = $(player_name_a).text().trim();
+    const player_name_containers = $(team_container)
+        .find(".removetag")
+        .toArray();
+    for (const player_name_container of player_name_containers) {
+        const player_name_text = $(player_name_container).text().trim();
 
         if (player_name_text == "") {
             continue;
