@@ -1,8 +1,8 @@
-# Pickleballbrackers.com Upgrades
+# Pickleballbrackets.com Upgrades
 
 ## Details
 
-Script adding functionality to pickleballbrackers.com
+Script adding functionality to pickleballbrackets.com
 
 Tournament's registered players lists:
 
